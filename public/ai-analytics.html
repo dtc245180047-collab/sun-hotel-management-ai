@@ -1,0 +1,183 @@
+<!-- public/ai-analytics.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Phân tích - SUN HOTEL</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f0f4f8; }
+    .chat-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .message {
+      margin-bottom: 20px;
+      padding: 16px 20px;
+      border-radius: 16px;
+      max-width: 90%;
+    }
+    .user-message {
+      background: #1e40af;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    .ai-message {
+      background: white;
+      border: 1px solid #e5e7eb;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
+    .ai-note {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+    .input-area {
+      position: sticky;
+      bottom: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    }
+    .suggestion-btn {
+      background: #eff6ff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      color: #1e40af;
+      margin: 4px;
+    }
+    .suggestion-btn:hover { background: #dbeafe; }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <a href="dashboard.html" class="text-muted text-decoration-none mb-3 d-inline-block">← Quay lại</a>
+    
+    <h3 class="fw-bold mb-4 text-center">🤖 Trợ lý Phân tích & Hỏi đáp Dữ liệu</h3>
+    <p class="text-center text-muted mb-5">Hỏi tôi bất kỳ về hoạt động, doanh thu, công suất phòng của khách sạn</p>
+
+    <div class="chat-container">
+      <!-- Gợi ý câu hỏi -->
+      <div class="text-center mb-4">
+        <p class="text-muted small mb-2">Thử hỏi ngay:</p>
+        <button class="suggestion-btn" data-q="Doanh thu tháng này là bao nhiêu?">Doanh thu tháng này?</button>
+        <button class="suggestion-btn" data-q="Công suất phòng hôm nay so với tuần trước?">Công suất phòng?</button>
+        <button class="suggestion-btn" data-q="Loại phòng nào có doanh thu cao nhất?">Phòng nào tốt nhất?</button>
+        <button class="suggestion-btn" data-q="Đề xuất khuyến nghị cải thiện doanh thu?">Khuyến nghị?</button>
+      </div>
+
+      <!-- Lịch sử hội thoại -->
+      <div id="chatHistory">
+        <div class="message ai-message">
+          Xin chào! Tôi là trợ lý phân tích dữ liệu SUN HOTEL. Tôi có thể giúp bạn xem số liệu, trả lời câu hỏi và đưa ra gợi ý dựa trên dữ liệu thực tế. Hãy đặt câu hỏi bên dưới nhé!
+          <p class="ai-note">Dữ liệu cập nhật đến: <span id="updateTime">--/--/----</span></p>
+        </div>
+      </div>
+
+      <!-- Khu vực nhập câu hỏi -->
+      <div class="input-area mt-4">
+        <div class="row g-2">
+          <div class="col-md-10">
+            <input type="text" id="questionInput" class="form-control form-control-lg" 
+                   placeholder="VD: Doanh thu phòng VIP tuần này so với tuần trước thay đổi thế nào?">
+          </div>
+          <div class="col-md-2">
+            <button id="askBtn" class="btn btn-primary w-100 h-100">Gửi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Cập nhật thời gian dữ liệu
+    document.getElementById('updateTime').textContent = new Date().toLocaleDateString('vi-VN');
+
+    // Gợi ý câu hỏi nhanh
+    document.querySelectorAll('.suggestion-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('questionInput').value = btn.dataset.q;
+        document.getElementById('askBtn').click();
+      });
+    });
+
+    // Gửi câu hỏi
+    document.getElementById('askBtn').addEventListener('click', sendQuestion);
+    document.getElementById('questionInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendQuestion();
+    });
+
+    async function sendQuestion() {
+      const input = document.getElementById('questionInput');
+      const question = input.value.trim();
+      if (!question) return;
+
+      // Thêm tin nhắn người dùng
+      addMessage(question, 'user');
+      input.value = '';
+
+      // Thêm trạng thái AI đang suy nghĩ
+      const loadingId = 'loading-' + Date.now();
+      addMessage('Đang phân tích dữ liệu...', 'ai-loading', loadingId);
+
+      // Gọi API AI
+      try {
+        const res = await fetch('/api/ai/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+        
+        const data = await res.json();
+        
+        // Xóa trạng thái tải
+        document.getElementById(loadingId)?.remove();
+        
+        if (data.success) {
+          addMessage(data.answer, 'ai', null, data.note);
+        } else {
+          addMessage(`Xin lỗi, tôi không thể trả lời câu hỏi này. ${data.message || 'Vui lòng thử hỏi rõ hơn hoặc liên hệ bộ phận hỗ trợ.'}`, 'ai-error');
+        }
+        
+      } catch (err) {
+        document.getElementById(loadingId)?.remove();
+        addMessage('Lỗi kết nối. Vui lòng thử lại sau.', 'ai-error');
+      }
+    }
+
+    function addMessage(content, type, id = null, note = null) {
+      const history = document.getElementById('chatHistory');
+      const div = document.createElement('div');
+      div.id = id || '';
+      
+      if (type === 'user') {
+        div.className = 'message user-message';
+        div.textContent = content;
+      } else if (type === 'ai-loading') {
+        div.className = 'message ai-message text-muted';
+        div.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${content}`;
+      } else if (type === 'ai-error') {
+        div.className = 'message ai-message text-danger';
+        div.textContent = content;
+      } else {
+        div.className = 'message ai-message';
+        div.innerHTML = content.replace(/\n/g, '<br>');
+        if (note) {
+          div.innerHTML += `<p class="ai-note mt-2">${note}</p>`;
+        } else {
+          div.innerHTML += `<p class="ai-note mt-2">⚠️ Dựa trên dữ liệu thực tế — chỉ tham khảo</p>`;
+        }
+      }
+      
+      history.appendChild(div);
+      history.scrollTop = history.scrollHeight;
+    }
+  </script>
+</body>
+</html>

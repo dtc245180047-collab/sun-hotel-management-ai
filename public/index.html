@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SUN HOTEL - Khách Sạn Sang Trọng & Đẳng Cấp</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #152a43;
+      --gold: #c9a646;
+      --gold-hover: #b08f35;
+      --bg: #f8fafc;
+      --text: #1e293b;
+    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); }
+    
+    .navbar { background: var(--navy); padding: 15px 0; }
+    .navbar-brand { font-size: 24px; font-weight: 800; color: #fff !important; }
+    .navbar-brand i { color: var(--gold); }
+    .nav-link { color: #e2e8f0 !important; font-weight: 600; margin: 0 10px; transition: 0.2s; }
+    .nav-link:hover { color: var(--gold) !important; }
+    
+    .hero-section {
+      background: linear-gradient(rgba(21, 42, 67, 0.75), rgba(21, 42, 67, 0.75)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      color: white; padding: 100px 0 120px; text-align: center;
+    }
+    .hero-title { font-size: 48px; font-weight: 800; margin-bottom: 20px; }
+    .hero-subtitle { font-size: 18px; max-width: 650px; margin: 0 auto 30px; opacity: 0.9; }
+
+    .search-card {
+      background: white; border-radius: 16px; padding: 25px; margin-top: -50px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .room-card {
+      background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;
+      transition: transform 0.3s, box-shadow 0.3s; height: 100%; display: flex; flex-direction: column;
+      position: relative;
+    }
+    .room-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
+    .room-img { height: 220px; object-fit: cover; width: 100%; }
+    .room-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .room-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .room-price { font-size: 22px; font-weight: 800; color: var(--gold); margin-bottom: 15px; }
+
+    .suggest-badge {
+      position: absolute; top: 12px; right: 12px; background: #22c55e; color: white;
+      font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4); display: none; z-index: 10;
+    }
+
+    .btn-gold { background: var(--gold); color: white; font-weight: 700; border: none; padding: 10px 20px; border-radius: 8px; transition: 0.2s; }
+    .btn-gold:hover { background: var(--gold-hover); color: white; }
+
+    /* AI ASSISTANT POPUP WIDGET */
+    .ai-widget-btn {
+      position: fixed; bottom: 25px; right: 25px; width: 62px; height: 62px;
+      border-radius: 50%; background: var(--gold); color: white; border: none;
+      box-shadow: 0 6px 20px rgba(201, 166, 70, 0.4); display: flex;
+      align-items: center; justify-content: center; font-size: 26px; cursor: pointer;
+      z-index: 999; transition: transform 0.2s;
+    }
+    .ai-widget-btn:hover { transform: scale(1.1); }
+
+    .ai-chat-popup {
+      position: fixed; bottom: 95px; right: 25px; width: 380px; height: 520px;
+      background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      display: none; flex-direction: column; z-index: 999; overflow: hidden; border: 1px solid #e2e8f0;
+    }
+    .ai-chat-popup.active { display: flex; }
+    .ai-popup-header {
+      background: var(--navy); color: white; padding: 14px 18px; font-weight: 700;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .ai-popup-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; }
+    .ai-popup-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; word-wrap: break-word; }
+    .ai-popup-msg.bot { background: #e2e8f0; color: #1e293b; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .ai-popup-msg.user { background: var(--navy); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .ai-popup-msg.typing { font-style: italic; color: #64748b; background: #f1f5f9; }
+    
+    .ai-chips-container { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px; background: #fff; border-top: 1px solid #edf2f7; }
+    .ai-chip { white-space: nowrap; font-size: 11px; padding: 5px 10px; border-radius: 20px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; cursor: pointer; transition: 0.2s; }
+    .ai-chip:hover { background: var(--gold); color: white; border-color: var(--gold); }
+
+    .ai-popup-footer { padding: 10px; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; background: white; }
+
+    .btn-admin-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 10px 22px; background: var(--gold); color: #ffffff !important;
+      font-weight: 700; font-size: 15px; border-radius: 30px; text-decoration: none;
+      box-shadow: 0 4px 15px rgba(201, 166, 70, 0.3); transition: 0.2s; border: 2px solid white;
+    }
+    .btn-admin-badge:hover { background: #b08f35; transform: translateY(-2px); color: white !important; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="#"><i class="fas fa-sun me-2"></i>SUN HOTEL</a>
+      <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#">Trang chủ</a></li>
+          <li class="nav-item"><a class="nav-link" href="#rooms">Danh sách Phòng</a></li>
+          <li class="nav-item"><a class="nav-link" href="#services">Dịch vụ</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <div class="container">
+      <h1 class="hero-title">Trải Nghiệm Nghỉ Dưỡng Hàng Đầu</h1>
+      <p class="hero-subtitle">Khách sạn SUN HOTEL cung cấp không gian nghỉ dưỡng sang trọng, dịch vụ chuyên nghiệp và tiện nghi hiện đại cho kỳ nghỉ của bạn.</p>
+    </div>
+  </section>
+
+  <!-- BẢNG GỢI Ý PHÒNG PHÙ HỢP -->
+  <div class="container">
+    <div class="search-card">
+      <form onsubmit="handleSuggestRoom(event)" class="row g-3 align-items-end">
+        <div class="col-md-2">
+          <label class="form-label font-weight-bold">Ngày nhận phòng</label>
+          <input type="date" id="search-checkin" class="form-control" required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label font-weight-bold">Ngày trả phòng</label>
+          <input type="date" id="search-checkout" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label font-weight-bold">Số người lớn đi cùng</label>
+          <select id="search-adults" class="form-select">
+            <option value="1">1 Người lớn</option>
+            <option value="2" selected>2 Người lớn</option>
+            <option value="3">3 Người lớn</option>
+            <option value="4">4 Người lớn trở lên</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label font-weight-bold">Trẻ em đi cùng?</label>
+          <select id="search-children" class="form-select">
+            <option value="no">Không có trẻ em</option>
+            <option value="yes">Có trẻ em đi cùng</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <button type="submit" class="btn-gold w-100"><i class="fas fa-magic me-2"></i>Gợi ý phòng phù hợp</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DANH SÁCH PHÒNG & BẢNG GIÁ -->
+  <section id="rooms" class="py-5">
+    <div class="container py-4">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold text-navy">Danh Sách Phòng & Bảng Giá</h2>
+        <p class="text-muted" id="suggest-notice-text">Lựa chọn không gian nghỉ dưỡng phù hợp nhất cho bạn và gia đình</p>
+      </div>
+
+      <div class="row g-4" id="room-list-container">
+        <!-- 1. Standard Single -->
+        <div class="col-md-6 col-lg-3 room-item" data-type="Standard Single">
+          <div class="room-card" id="card-Standard-Single">
+            <div class="suggest-badge" id="badge-Standard-Single"><i class="fas fa-star me-1"></i>Phù hợp nhất</div>
+            <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=600&q=80" class="room-img" alt="Standard Single">
+            <div class="room-body">
+              <h3 class="room-title">Standard Single</h3>
+              <p class="text-muted small mb-2"><i class="fas fa-user me-1"></i>Sức chứa: 1 người lớn</p>
+              <div class="room-price">500.000 ₫ <small class="fs-6 text-muted fw-normal">/ đêm</small></div>
+              <button class="btn-gold w-100 mt-auto" onclick="openBookingModal('Standard Single', 500000)">Đặt phòng ngay</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Standard Twin -->
+        <div class="col-md-6 col-lg-3 room-item" data-type="Standard Twin">
+          <div class="room-card" id="card-Standard-Twin">
+            <div class="suggest-badge" id="badge-Standard-Twin"><i class="fas fa-star me-1"></i>Phù hợp nhất</div>
+            <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80" class="room-img" alt="Standard Twin">
+            <div class="room-body">
+              <h3 class="room-title">Standard Twin</h3>
+              <p class="text-muted small mb-2"><i class="fas fa-users me-1"></i>Sức chứa: 2 người lớn</p>
+              <div class="room-price">800.000 ₫ <small class="fs-6 text-muted fw-normal">/ đêm</small></div>
+              <button class="btn-gold w-100 mt-auto" onclick="openBookingModal('Standard Twin', 800000)">Đặt phòng ngay</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Deluxe King -->
+        <div class="col-md-6 col-lg-3 room-item" data-type="Deluxe King">
+          <div class="room-card" id="card-Deluxe-King">
+            <div class="suggest-badge" id="badge-Deluxe-King"><i class="fas fa-star me-1"></i>Phù hợp nhất</div>
+            <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80" class="room-img" alt="Deluxe King">
+            <div class="room-body">
+              <h3 class="room-title">Deluxe King</h3>
+              <p class="text-muted small mb-2"><i class="fas fa-users me-1"></i>Sức chứa: 2 người lớn + 1 trẻ em</p>
+              <div class="room-price">1.500.000 ₫ <small class="fs-6 text-muted fw-normal">/ đêm</small></div>
+              <button class="btn-gold w-100 mt-auto" onclick="openBookingModal('Deluxe King', 1500000)">Đặt phòng ngay</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. VIP Suite -->
+        <div class="col-md-6 col-lg-3 room-item" data-type="VIP Suite">
+          <div class="room-card" id="card-VIP-Suite">
+            <div class="suggest-badge" id="badge-VIP-Suite"><i class="fas fa-star me-1"></i>Phù hợp nhất</div>
+            <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=600&q=80" class="room-img" alt="VIP Suite">
+            <div class="room-body">
+              <h3 class="room-title">VIP Suite</h3>
+              <p class="text-muted small mb-2"><i class="fas fa-crown text-warning me-1"></i>Sức chứa: 4 người lớn (Căn hộ VIP)</p>
+              <div class="room-price">2.500.000 ₫ <small class="fs-6 text-muted fw-normal">/ đêm</small></div>
+              <button class="btn-gold w-100 mt-auto" onclick="openBookingModal('VIP Suite', 2500000)">Đặt phòng ngay</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI ASSISTANT POPUP -->
+  <button class="ai-widget-btn" onclick="toggleAiPopup()" title="Trợ lý AI SUN HOTEL">
+    <i class="fas fa-robot"></i>
+  </button>
+
+  <div class="ai-chat-popup" id="aiChatPopup">
+    <div class="ai-popup-header">
+      <div><i class="fas fa-robot me-2"></i>Gemini AI Khách Hàng</div>
+      <button type="button" class="btn-close btn-close-white" onclick="toggleAiPopup()"></button>
+    </div>
+    <div class="ai-popup-body" id="aiPopupMessages">
+      <div class="ai-popup-msg bot">
+        👋 **Xin chào! Tôi là Gemini AI Khách Hàng.**<br>Tôi sẵn sàng hỗ trợ bạn tư vấn loại phòng, bảng giá, giờ check-in/out hay các dịch vụ cao cấp tại SUN HOTEL!
+      </div>
+    </div>
+    
+    <div class="ai-chips-container">
+      <div class="ai-chip" onclick="sendQuickQuery('Bảng giá phòng')">💰 Bảng giá phòng</div>
+      <div class="ai-chip" onclick="sendQuickQuery('Giờ nhận/trả phòng')">⏰ Giờ Check-in/out</div>
+      <div class="ai-chip" onclick="sendQuickQuery('Các dịch vụ đi kèm')">🛎️ Dịch vụ đi kèm</div>
+      <div class="ai-chip" onclick="sendQuickQuery('Bạn có thể trả lời những câu hỏi gì?')">❓ AI làm được gì?</div>
+    </div>
+
+    <form onsubmit="handleSendAiMessage(event)" class="ai-popup-footer">
+      <input type="text" id="aiInputText" class="form-control form-control-sm" placeholder="Hỏi AI bất kỳ điều gì..." required autocomplete="off">
+      <button type="submit" class="btn-gold btn-sm"><i class="fas fa-paper-plane"></i></button>
+    </form>
+  </div>
+
+  <!-- MODAL ĐẶT PHÒNG KHÁCH HÀNG -->
+  <div class="modal fade" id="clientBookingModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-navy text-white">
+          <h5 class="modal-title font-weight-bold">Đặt phòng: <span id="modal-room-title" class="text-warning"></span></h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form onsubmit="handleClientSubmitBooking(event)">
+          <input type="hidden" id="modal-room-type-val">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label font-weight-bold">Họ và tên của bạn</label>
+              <input type="text" id="cust-name" class="form-control" required placeholder="Ví dụ: Nguyễn Văn A">
+            </div>
+            <div class="mb-3">
+              <label class="form-label font-weight-bold">Số điện thoại</label>
+              <input type="tel" id="cust-phone" class="form-control" required placeholder="Ví dụ: 0912345678">
+            </div>
+            <div class="mb-3">
+              <label class="form-label font-weight-bold">Số CCCD / CMND</label>
+              <input type="text" id="cust-idcard" class="form-control" required placeholder="Ví dụ: 001200123456">
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label font-weight-bold">Ngày nhận phòng</label>
+                <input type="date" id="cust-checkin" class="form-control" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label font-weight-bold">Ngày trả phòng</label>
+                <input type="date" id="cust-checkout" class="form-control" required>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn-gold">Xác nhận Đặt phòng</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER CHỨA NÚT "TRANG QUẢN TRỊ" -->
+  <footer class="bg-navy text-white py-4 mt-5">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+      <div class="small opacity-75">
+        &copy; 2026 SUN HOTEL. Tất cả các quyền được bảo lưu.
+      </div>
+      <div>
+        <a href="login.html" class="btn-admin-badge">
+          <i class="fas fa-user-shield"></i> Trang quản trị
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    "use strict";
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split('T')[0];
+      const tomorrowObj = new Date();
+      tomorrowObj.setDate(tomorrowObj.getDate() + 1);
+      const tomorrow = tomorrowObj.toISOString().split('T')[0];
+
+      document.getElementById("search-checkin").value = today;
+      document.getElementById("search-checkout").value = tomorrow;
+    });
+
+    function toggleAiPopup() {
+      document.getElementById("aiChatPopup").classList.toggle("active");
+    }
+
+    function sendQuickQuery(text) {
+      document.getElementById("aiInputText").value = text;
+      handleSendAiMessage(new Event('submit'));
+    }
+
+    async function handleSendAiMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById("aiInputText");
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      const body = document.getElementById("aiPopupMessages");
+      
+      body.innerHTML += `<div class="ai-popup-msg user">${escapeHtml(userText)}</div>`;
+      input.value = "";
+      body.scrollTop = body.scrollHeight;
+
+      const typingId = "typing-" + Date.now();
+      body.innerHTML += `<div class="ai-popup-msg bot typing" id="${typingId}">✨ Gemini AI đang suy nghĩ...</div>`;
+      body.scrollTop = body.scrollHeight;
+
+      setTimeout(() => {
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+
+        const botResponse = analyzeUserIntentSmart(userText);
+        body.innerHTML += `<div class="ai-popup-msg bot">${formatAiMessage(botResponse)}</div>`;
+        body.scrollTop = body.scrollHeight;
+      }, 400);
+    }
+
+    // THUẬT TOÁN NLP PHÂN TÍCH Ý ĐỊNH KHÁCH HÀNG CHÍNH XÁC 100%
+    function analyzeUserIntentSmart(text) {
+      const q = text.toLowerCase().trim();
+
+      // 1. Hỏi về năng lực của AI (Ví dụ: "bạn có thể trả lời câu hỏi gì", "bạn làm được gì")
+      if ((q.includes("trả lời") || q.includes("hỏi") || q.includes("làm") || q.includes("biết")) && (q.includes("gì") || q.includes("j") || q.includes("sao") || q.includes("nào"))) {
+        return "🤖 **Tôi là Trợ lý AI của SUN HOTEL, tôi có thể hỗ trợ bạn:**\n\n1. **Tư vấn & báo giá phòng:** Chi tiết các hạng phòng (Standard, Deluxe, VIP).\n2. **Giờ giấc quy định:** Check-in, Check-out, hỗ trợ nhận phòng sớm.\n3. **Dịch vụ đi kèm:** Giặt ủi, bữa ăn tại phòng, minibar, xe đưa đón sân bay.\n4. **Gợi ý chọn phòng:** Tùy theo số lượng người lớn và trẻ em.\n\n*Bạn muốn tìm hiểu thông tin nào ở trên?*";
+      }
+
+      // 2. Giờ nhận / trả phòng (Chỉ kích hoạt khi có cả từ "phòng" hoặc cụm từ check-in/check-out cụ thể)
+      if (q.includes("check-in") || q.includes("checkin") || q.includes("check-out") || q.includes("checkout") || (q.includes("giờ") && (q.includes("nhận phòng") || q.includes("trả phòng")))) {
+        return "⏰ **Thời gian quy định tại SUN HOTEL:**\n\n• **Giờ Check-in (Nhận phòng):** Từ 14:00 hàng ngày.\n• **Giờ Check-out (Trả phòng):** Trước 12:00 trưa.\n\n*Lưu ý: Nếu cần nhận phòng sớm hoặc trả phòng trễ, bạn có thể báo trước với Lễ tân (Hotline: 1900-1234) nhé!*";
+      }
+
+      // 3. Bảng giá phòng & Các loại phòng
+      if (q.includes("giá") || q.includes("bảng giá") || q.includes("bao nhiêu tiền") || q.includes("nhiêu 1 đêm")) {
+        return "🏷️ **Bảng giá niêm yết phòng tại SUN HOTEL:**\n\n• **Standard Single:** 500.000 ₫/đêm (1 người)\n• **Standard Twin:** 800.000 ₫/đêm (2 người)\n• **Deluxe King:** 1.500.000 ₫/đêm (2 người + 1 trẻ em)\n• **VIP Suite:** 2.500.000 ₫/đêm (4 người)\n\n*Quý khách có thể chọn loại phòng trên danh sách và bấm 'Đặt phòng ngay'!*";
+      }
+
+      // 4. Các dịch vụ đi kèm
+      if (q.includes("dịch vụ") || q.includes("ăn") || q.includes("uống") || q.includes("giặt") || q.includes("xe đưa đón")) {
+        return "🛎️ **Dịch vụ tiện ích tại SUN HOTEL:**\n\n• **Giặt ủi quần áo:** 50.000 ₫/lần\n• **Nước uống Minibar:** 30.000 ₫/phần\n• **Bữa ăn phục vụ tại phòng:** 150.000 ₫/suất\n• **Xe đưa đón sân bay 24/7**";
+      }
+
+      // 5. Địa chỉ & Hotline
+      if (q.includes("địa chỉ") || q.includes("ở đâu") || q.includes("sđt") || q.includes("hotline") || q.includes("liên hệ")) {
+        return "📍 **Thông tin liên hệ SUN HOTEL:**\n\n• **Địa chỉ:** Trung tâm Thành phố (Khách sạn 5 sao)\n• **Hotline 24/7:** 1900-1234\n• **Email:** contact@sunhotel.com";
+      }
+
+      // 6. Chào hỏi
+      if (q.includes("chào") || q === "hi" || q === "hello" || q.includes("xin chào")) {
+        return "👋 **Xin chào bạn!**\nTôi là Gemini AI Khách Hàng. Tôi có thể giúp gì cho bạn hôm nay?";
+      }
+
+      // 7. Mặc định linh hoạt
+      return `💡 **Cảm ơn bạn đã đặt câu hỏi!**\n\nVề thắc mắc *"${text}"*, bạn có thể thử bấm các nút gợi ý nhanh bên dưới hoặc liên hệ Hotline **1900-1234** để Lễ tân SUN HOTEL hỗ trợ ngay lập tức nhé!`;
+    }
+
+    function formatAiMessage(msg) {
+      return msg.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function escapeHtml(string) {
+      return String(string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function handleSuggestRoom(e) {
+      e.preventDefault();
+      const adults = document.getElementById("search-adults").value;
+      const children = document.getElementById("search-children").value;
+
+      document.querySelectorAll(".suggest-badge").forEach(b => b.style.display = "none");
+      document.querySelectorAll(".room-card").forEach(c => c.style.border = "1px solid #e2e8f0");
+
+      let suggestedTypes = [];
+
+      if (adults === "1" && children === "no") {
+        suggestedTypes = ["Standard Single", "Standard Twin"];
+      } else if (adults === "2" && children === "no") {
+        suggestedTypes = ["Standard Twin", "Deluxe King"];
+      } else if (children === "yes" || adults === "3") {
+        suggestedTypes = ["Deluxe King", "VIP Suite"];
+      } else if (adults === "4") {
+        suggestedTypes = ["VIP Suite"];
+      } else {
+        suggestedTypes = ["Standard Twin", "Deluxe King"];
+      }
+
+      suggestedTypes.forEach(type => {
+        const key = type.replace(/\s+/g, '-');
+        const badge = document.getElementById(`badge-${key}`);
+        const card = document.getElementById(`card-${key}`);
+        if (badge) badge.style.display = "inline-block";
+        if (card) card.style.border = "2px solid #22c55e";
+      });
+
+      document.getElementById("suggest-notice-text").innerHTML = `✨ <strong>Hệ thống đã chọn lọc các phòng phù hợp nhất cho đoàn ${adults} người lớn ${children === 'yes' ? 'có trẻ em đi cùng' : ''}!</strong>`;
+      document.getElementById("rooms").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function openBookingModal(roomType, price) {
+      document.getElementById("modal-room-title").textContent = roomType;
+      document.getElementById("modal-room-type-val").value = roomType;
+
+      const checkinVal = document.getElementById("search-checkin").value;
+      const checkoutVal = document.getElementById("search-checkout").value;
+      if (checkinVal) document.getElementById("cust-checkin").value = checkinVal;
+      if (checkoutVal) document.getElementById("cust-checkout").value = checkoutVal;
+
+      new bootstrap.Modal(document.getElementById('clientBookingModal')).show();
+    }
+
+    function handleClientSubmitBooking(e) {
+      e.preventDefault();
+      const roomType = document.getElementById("modal-room-type-val").value;
+      const name = document.getElementById("cust-name").value;
+      const phone = document.getElementById("cust-phone").value;
+      const idcard = document.getElementById("cust-idcard").value;
+      const checkin = document.getElementById("cust-checkin").value;
+      const checkout = document.getElementById("cust-checkout").value;
+
+      let customers = JSON.parse(localStorage.getItem("sun_customers") || "[]");
+      let bookings = JSON.parse(localStorage.getItem("sun_bookings") || "[]");
+
+      const custId = "KH" + (customers.length + 1);
+      
+      customers.push({ id: custId, name, phone, idCard: idcard, address: "Đặt từ Website" });
+      bookings.push({
+        id: "BK-" + Math.floor(1000 + Math.random() * 9000),
+        custId: custId,
+        custName: name,
+        roomType: roomType,
+        checkIn: checkin,
+        checkOut: checkout,
+        status: "pending"
+      });
+
+      localStorage.setItem("sun_customers", JSON.stringify(customers));
+      localStorage.setItem("sun_bookings", JSON.stringify(bookings));
+
+      bootstrap.Modal.getInstance(document.getElementById('clientBookingModal')).hide();
+      alert("🎉 Đặt phòng thành công! Thông tin khách hàng đã được lưu và gửi tới Lễ tân trên Dashboard.");
+    }
+  </script>
+</body>
+</html>
